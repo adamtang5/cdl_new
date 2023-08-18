@@ -821,7 +821,8 @@ def ydl_download_espn_yt(since_date, format=ydl_api_extended.yt_formats['labels'
 
 
 def ydl_espn_group_spider(url):
-  source_code = requests.get(url)
+  headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+  source_code = requests.get(url, headers=headers)
   plain_text = source_code.text
   # print(plain_text)
 
