@@ -338,7 +338,7 @@ podcasts = [
   {'details': {'name': 'security now', 'xml_url': 'http://feeds.twit.tv/sn.xml'}},
   {'details': {'name': 'aom', 'xml_url': 'http://feeds.feedburner.com/artofmanlinesspodcast'}},
   {'details': {'name': 'klaw show', 'xml_url': 'https://feeds.simplecast.com/L15G3UJb', 'cdn_url': True}},
-  {'details': {'name': 'behind the braves', 'xml_url': 'http://mlb.mlb.com/feed/podcast/behind_the_braves_rss.xml'}},
+  {'details': {'name': 'behind the braves', 'xml_url': 'https://feeds.megaphone.fm/ENTDM7883543359'}},
   {'details': {'name': 'executive access', 'xml_url': 'http://mlb.mlb.com/feed/podcast/executive_access_rss.xml', 'cdn_url': True}},
   {'details': {'name': 'morning lineup', 'xml_url': 'http://mlb.mlb.com/feed/podcast/newsmakers_rss.xml'}},
   {'details': {'name': 'statcast podcast', 'xml_url': 'http://mlb.mlb.com/feed/podcast/statcast_podcast_rss.xml'}},
@@ -589,6 +589,10 @@ def espn_jnj_naming_rules(pod_date):
   return pod_date.__format__('%Y%m%d') + '-JNJ'
 
 
+def btb_naming_rules(pod_date):
+  return pod_date.__format__('%Y%m%d') + '-BTB'
+
+
 def klaw_show_naming_rules(pod_date):
   return pod_date.__format__('%Y%m%d') + '-KLAW'
 
@@ -608,6 +612,7 @@ agg_naming_rules = [
   {'creator_id': 'espn daily', 'naming_rule': espn_daily_naming_rules},
   {'creator_id': 'fantasy focus baseball', 'naming_rule': espn_ffb_naming_rules},
   {'creator_id': 'jalen and jacoby', 'naming_rule': espn_jnj_naming_rules},
+  {'creator_id': 'behind the braves', 'naming_rule': btb_naming_rules},
   {'creator_id': 'klaw show', 'naming_rule': klaw_show_naming_rules},
   {'creator_id': 'statcast podcast', 'naming_rule': bpd_naming_rules},
   {'creator_id': 'intentional talk', 'naming_rule': mlb_it_naming_rules},
