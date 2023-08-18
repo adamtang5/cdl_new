@@ -321,7 +321,7 @@ cuau_ids = ['china-uncensored', 'america-uncovered']
 podcasts = [
   {'pod_id': 2386164,
    'details': {
-     'name': 'baseball tonight', 'xml_url': 'http://www.espn.com/espnradio/feeds/rss/podcast.xml?id=2386164'
+     'name': 'baseball tonight', 'xml_url': 'https://feeds.megaphone.fm/ESP1723897648'
   }},
   {'pod_id': 2544461,
    'details': {
@@ -331,6 +331,10 @@ podcasts = [
    'details': {
      'name': 'jalen and jacoby', 'xml_url': 'http://www.espn.com/espnradio/feeds/rss/podcast.xml?id=9545077'
   }},
+  {'pod_id': 27852002,
+   'details': {
+     'name': 'espn daily', 'xml_url': 'https://feeds.megaphone.fm/ESP8348692127'
+   }},
   {'details': {'name': 'security now', 'xml_url': 'http://feeds.twit.tv/sn.xml'}},
   {'details': {'name': 'aom', 'xml_url': 'http://feeds.feedburner.com/artofmanlinesspodcast'}},
   {'details': {'name': 'klaw show', 'xml_url': 'https://feeds.simplecast.com/L15G3UJb', 'cdn_url': True}},
@@ -573,6 +577,10 @@ def espn_bbtn_naming_rules(pod_date):
   return pod_date.__format__('%Y%m%d') + '-BBTN'
 
 
+def espn_daily_naming_rules(pod_date):
+  return pod_date.__format__('%Y%m%d') + '-DAILY'
+
+
 def espn_ffb_naming_rules(pod_date):
   return pod_date.__format__('%Y%m%d') + '-FFB'
 
@@ -597,6 +605,7 @@ agg_naming_rules = [
   {'creator_id': 'china-uncensored', 'naming_rule': cu_naming_rules},
   {'creator_id': 'threat-wire', 'naming_rule': tw_naming_rules},
   {'creator_id': 'baseball tonight', 'naming_rule': espn_bbtn_naming_rules},
+  {'creator_id': 'espn daily', 'naming_rule': espn_daily_naming_rules},
   {'creator_id': 'fantasy focus baseball', 'naming_rule': espn_ffb_naming_rules},
   {'creator_id': 'jalen and jacoby', 'naming_rule': espn_jnj_naming_rules},
   {'creator_id': 'klaw show', 'naming_rule': klaw_show_naming_rules},

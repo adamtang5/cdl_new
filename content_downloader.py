@@ -17,7 +17,7 @@ import ydl_alg
 import gc
 import ydl_api_extended
 
-since_date = datetime.date(2023, 8, 9)
+since_date = datetime.date(2023, 8, 15)
 nfl_season = 2022
 nfl_week = 1
 
@@ -30,12 +30,13 @@ Download podcasts
 '''
 
 # podcast_alg.aom_downloader('aom', since_date)
-podcast_alg.espn_podcenter_downloader('baseball tonight', since_date)
+# podcast_alg.espn_podcenter_downloader('baseball tonight', since_date)
+# podcast_alg.espn_podcenter_downloader('espn daily', since_date)
 # podcast_alg.klaw_show_downloader(since_date)
-podcast_alg.mlb_podcast_downloader('statcast podcast', datetime_tools.day_before(since_date))
+# podcast_alg.mlb_podcast_downloader('statcast podcast', datetime_tools.day_before(since_date))
 # podcast_alg.sn_downloader('security now', datetime_tools.day_before(since_date))
 # podcast_alg.rthk_downloader(since_date)
-podcast_alg.rthk_downloader(datetime_tools.day_after(since_date))
+# podcast_alg.rthk_downloader(datetime_tools.day_after(since_date))
 
 
 
@@ -151,7 +152,7 @@ gc.collect()
 
 
 gc.collect()
-ydl_espn_pkg()
+# ydl_espn_pkg()
 
 
 print(datetime.datetime.now())
