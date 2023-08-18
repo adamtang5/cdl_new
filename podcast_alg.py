@@ -272,7 +272,7 @@ def sn_downloader(pod_name, since_date):
   for item in whole_soup.find_all("item"):
     dl_url = item.find("enclosure").get("url")
     #print(dl_url)
-    filename = re.split('\/',dl_url)[-1]
+    filename = re.split('\/',dl_url)[-1].split('_')[-1]
     #print(filename)
     pod_date = item.find("pubdate").string[:16]
     pod_datetime = datetime.datetime.strptime(pod_date, '%a, %d %b %Y')
