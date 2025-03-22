@@ -449,38 +449,48 @@ vchannels_dict = {
 }
 
 def lookup_by_source(source):
-  d = {}
-  platform_id = list_id = upload_url = dest_path = playlists_url = ''
-  for i in vchannels_dict['sources']:
-    if i['id'] == source:
-      platform_id = i['platform']
-      list_id = i['list_id']
-      if platform_id == 'youtube':
-        upload_url = i['upload_url']
-      try:
-        if i['playlists_url']:
-          playlists_url = i['playlists_url']
-      except KeyError:
-        playlists_url = ''
-
-  for i in vchannels_dict['destinations']:
-    if i['id'] == source:
-      dest_path = local_env.video_root + i['path']
-
-  for i in vchannels_dict['platforms']:
-    if i['id'] == platform_id:
-      d = {
-        'id': source,
-        'platform': platform_id,
-        'data_source': i['url_prefix'] + list_id + i['url_suffix'],
-        'upload_url': upload_url,
-        'playlists_url': playlists_url,
-        'destination_path': dest_path,
-        'low_res_label': i['low_res_label'],
-        'high_res_label': i['high_res_label'],
-        'long_form': i['long_form']
-      }
-  return d
+  return {
+    'id': source,
+    'platform': VCHANNELS[source]['platform'],
+    'data_source': VPLATFORMS[VCHANNELS[source]['platform']]['url_prefix'] +
+      VCHANNELS[source]['list_id'] +
+      VPLATFORMS[VCHANNELS[source]['platform']]['url_suffix'],
+    'destination_path': VCHANNELS[source]['path'],
+    'low_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['low_res_label'],
+    'high_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['high_res_label'],
+    'long_form': VPLATFORMS[VCHANNELS[source]['platform']]['long_form'],
+  }
+  # platform_id = list_id = upload_url = dest_path = playlists_url = ''
+  # for i in vchannels_dict['sources']:
+  #   if i['id'] == source:
+  #     platform_id = i['platform']
+  #     list_id = i['list_id']
+  #     if platform_id == 'youtube':
+  #       upload_url = i['upload_url']
+  #     try:
+  #       if i['playlists_url']:
+  #         playlists_url = i['playlists_url']
+  #     except KeyError:
+  #       playlists_url = ''
+  #
+  # for i in vchannels_dict['destinations']:
+  #   if i['id'] == source:
+  #     dest_path = local_env.video_root + i['path']
+  #
+  # for i in vchannels_dict['platforms']:
+  #   if i['id'] == platform_id:
+  #     d = {
+  #       'id': source,
+  #       'platform': platform_id,
+  #       'data_source': i['url_prefix'] + list_id + i['url_suffix'],
+  #       'upload_url': upload_url,
+  #       'playlists_url': playlists_url,
+  #       'destination_path': dest_path,
+  #       'low_res_label': i['low_res_label'],
+  #       'high_res_label': i['high_res_label'],
+  #       'long_form': i['long_form']
+  #     }
+  # return d
 
 # print(lookup_by_source('mkbhd'))
 
