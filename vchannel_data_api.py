@@ -13,6 +13,222 @@ import local_env
 import filename_tools
 import re
 
+VPLATFORMS = {
+  'youtube': {
+   'url_prefix': 'https://www.youtube.com/playlist?list=',
+   'url_suffix': '',
+   'low_res_label': '360p - mp4',
+   'high_res_label': '720p - mp4',
+   'long_form': '144p - 3gp',
+  },
+  'espn': {
+   'url_prefix': 'http://m.espn.com/general/video?cid=',
+   'url_suffix': '&page=all',
+   'low_res_label': '360p - mp4',
+   'high_res_label': '720p - mp4',
+   'long_form': '144p - mp4',
+  },
+}
+
+VCHANNELS = {
+  'america-uncovered': {
+    'platform': 'youtube',
+    'list_id': 'UU_7vFlErTHxVD-IFNB-BFCg',
+    'upload_url': 'https://www.youtube.com/c/AmericaUncovered/videos',
+    'path': local_env.rolling_video_path,
+  },
+  'china-uncensored': {
+    'platform': 'youtube',
+    'list_id': 'UUgFP46yVT-GG4o1TgXn-04Q',
+    'upload_url': 'https://www.youtube.com/c/ChinaUncensored/videos',
+    'path': local_env.rolling_video_path,
+  },
+  'computerphile': {
+    'platform': 'youtube',
+    'list_id': 'UU9-y-6csu5WGm29I7JiwpnA',
+    'upload_url': 'https://www.youtube.com/user/Computerphile/videos',
+    'path': local_env.computerphile_path,
+  },
+  'numberphile': {
+    'platform': 'youtube',
+    'list_id': 'UUoxcjq-8xIDTYp3uz647V5A',
+    'upload_url': 'https://www.youtube.com/user/numberphile/videos',
+    'path': local_env.numberphile_path,
+  },
+  'numberphile2': {
+    'platform': 'youtube',
+    'list_id': 'UUUyp1gCHZJU_fGWFf2rtMkCg',
+    'upload_url': 'https://www.youtube.com/user/numberphile2/videos',
+    'path': local_env.numberphile_path,
+  },
+  'etcg': {
+    'platform': 'youtube',
+    'list_id': 'UUD4EOyXKjfDUhCI6jlOZZYQ',
+    'upload_url': 'https://www.youtube.com/c/Elithecomputerguypage/videos',
+    'path': local_env.etcg_longform_path,
+  },
+  'etcg-dailyblob': {
+    'platform': 'youtube',
+    'list_id': 'UUJRhK2b92UpOr4LBCWVaFDw',
+    'upload_url': 'https://www.youtube.com/@EliComputerGuyLive/videos',
+    'path': local_env.etcg_longform_path,
+  },
+  'etcg-fn': {
+    'platform': 'youtube',
+    'list_id': 'UULhuVUeaOfQLRctfj4OiahQ',
+    'upload_url': 'https://www.youtube.com/@FailedNormal/videos',
+    'path': local_env.etcg_longform_path,
+  },
+  'threatwire': {
+    'platform': 'youtube',
+    'list_id': 'PLW5y1tjAOzI0Sx4UU2fncEwQ9BQLr5Vlu',
+    'upload_url': 'https://www.youtube.com/c/hak5/videos',
+    'path': local_env.rolling_video_path,
+  },
+  'cnbc': {
+    'platform': 'youtube',
+    'list_id': 'UUvJJ_dzjViJCoLf5uKUTwoA',
+    'upload_url': 'https://www.youtube.com/c/CNBC/videos',
+    'path': local_env.cnbc_path,
+  },
+  'mkbhd': {
+    'platform': 'youtube',
+    'list_id': 'UUBJycsmduvYEL83R_U4JriQ',
+    'upload_url': 'https://www.youtube.com/c/mkbhd/videos',
+    'path': local_env.rolling_video_path,
+  },
+  'bible-project': {
+    'platform': 'youtube',
+    'list_id': 'UUeqnFRVfjy5R5ZUR92IZlpg',
+    'playlists': [
+      {'title': 'How to Read the Bible', 'list_id': 'PLH0Szn1yYNedn4FbBMMtOlGN-BPLQ54IH'},
+      {'title': 'Word Studies', 'list_id': 'PLH0Szn1yYNeclOdfwWBawnNT5ZkGFHxBf'},
+      {'title': 'The Wisdom Series', 'list_id': 'PLH0Szn1yYNeeKPNIy7YXjO3MGD8h8ifhr'},
+      {'title': 'The Gospel Series', 'list_id': 'PLH0Szn1yYNec6O3ZOZzAMb2WW2abJwzZ-'},
+      {'title': 'Biblical Themes', 'list_id': 'PLH0Szn1yYNec-HZjVHooeb4BSDSeHhEoh'},
+      {'title': 'NT', 'list_id': 'PLH0Szn1yYNecanpQqdixWAm3zHdhY2kPR'},
+      {'title': 'OT', 'list_id': 'PLH0Szn1yYNeeVFodkI9J_WEATHQCwRZ0u'},
+      {'title': 'The Torah Series', 'list_id': 'PLH0Szn1yYNee8aedW_5aCpnzkxnV7VQ3K'}
+    ],
+    'path': local_env.bible_project_path,
+  },
+  'bible-project-canto': {
+    'platform': 'youtube',
+    'list_id': 'UUoq4W0bLI28a17qPtZ5x1pQ',
+    'playlists': [
+      {'title': 'Read Scripture OT', 'list_id': 'PLf7Dzn7kHAxWPyOzcvJiIEY5NIxpo2gs-'},
+      {'title': 'Read Scripture NT', 'list_id': 'PLf7Dzn7kHAxWNyvLs4zl6w1ybrdTKBnU_'},
+      {'title': 'Biblical Themes', 'list_id': 'PLf7Dzn7kHAxVHv2xDRYXsapSq7ewGCBJB'},
+    ],
+    'path': local_env.bible_project_canto_path,
+  },
+  'bible-project-mandarin': {
+    'platform': 'youtube',
+    'list_id': 'UUBx_1SLtNfZEHx2HCWWTDVQ',
+    'playlists': [
+      {'title': 'How to Read the Bible', 'list_id': 'PLE-R0uydm0uPJ2M2BZ4dFYuWBjf-34pMX'},
+      {'title': 'Read Scripture OT', 'list_id': 'PLE-R0uydm0uN0xKD3tw0aheiQojlf1JB1'},
+      {'title': 'Read Scripture NT', 'list_id': 'PLE-R0uydm0uMPY7cu-kuEkcPHAM0M9Cby'},
+      {'title': 'The Torah Series', 'list_id': 'PLE-R0uydm0uPCscWNPsa-6ycASTfZcOeI'},
+      {'title': 'The Wisdom Series', 'list_id': 'PLE-R0uydm0uOVfcnpg1DcmzbEisLSJXEo'},
+      {'title': 'Biblical Themes', 'list_id': 'PLE-R0uydm0uMw9xIFD5G5xe1uyb71o7m8'},
+      {'title': 'Luke Mini Series', 'list_id': 'PLE-R0uydm0uM5h3RO2ToKLbxz9Jg5rCK9'},
+    ],
+    'path': local_env.bible_project_mandarin_path,
+  },
+  'espn-yt': {
+    'platform': 'youtube',
+    'list_id': 'UUiWLfSweyRNmLpgEHekhoAg',
+    'upload_url': 'https://www.youtube.com/c/ESPN/videos',
+    'path': local_env.espn_video_path,
+  },
+  'latest': {
+    'platform': 'espn',
+    'list_id': '2378529',
+    'path': local_env.espn_video_path,
+  },
+  'mlb': {
+    'platform': 'espn',
+    'list_id': '2521705',
+    'path': local_env.espn_video_path,
+  },
+  'nba': {
+    'platform': 'espn',
+    'list_id': '2459788',
+    'path': local_env.espn_video_path,
+  },
+  'nfl': {
+    'platform': 'espn',
+    'list_id': '2459789',
+    'path': local_env.espn_video_path,
+  },
+  'tennis': {
+    'platform': 'espn',
+    'list_id': '2491545',
+    'path': local_env.espn_video_path,
+  },
+}
+
+TEMP = {
+  'sources': [
+    {'id': 'ptx', 'platform': 'youtube', 'list_id': 'UUmv1CLT6ZcFdTJMHxaR9XeA',
+     'playlists': [
+       {'title': 'Christmas Is Here', 'list_id': 'PLU_mcNMHvximh1Z_LdrUU2r2_05PlISBM'},
+       {'title': 'Christmas Deluxe', 'list_id': 'OLAK5uy_nslslALKFTvA73yKcSmOjIKmDV5jPCv3I'},
+       {'title': 'PTXMas', 'list_id': 'PLIdPxD0zhZDMgFWjBnrkNywOYYfbbnvEw'}
+    ]},
+    {'id': 'coding-arena', 'platform': 'youtube', 'list_id': 'UUv5hBnMW_k3ZGRE1a0cVNAw',
+     'playlists': []},
+    {'id': 'cnet',
+     'platform': 'youtube',
+     'list_id': 'UUOmcA3f_RrH6b9NmcNa4tdg',
+     'upload_url': 'https://www.youtube.com/c/CNET/videos'},
+    {'id': 'verge',
+     'platform': 'youtube',
+     'list_id': 'UUddiUEpeqJcYeBxX1IVBKvQ',
+     'upload_url': 'https://www.youtube.com/c/TheVerge/videos'},
+    {'id': 'healthcare-triage',
+     'platform': 'youtube',
+     'list_id': 'UUabaQPYxxKepWUsEVQMT4Kw',
+     'upload_url': 'https://www.youtube.com/c/healthcaretriage/videos'},
+    {'id': 'khanacademy',
+     'platform': 'youtube',
+     'list_id': 'UU4a-Gbdw7vOaccHmFo40b9g',
+     'upload_url': 'https://www.youtube.com/c/khanacademy/videos'},
+    {'id': 'tasty-japan',
+     'platform': 'youtube',
+     'list_id': 'UUilGprjH_UBgR5vLVXPff3Q',
+     'upload_url': 'https://www.youtube.com/c/TastyJapan/videos'},
+    {'id': 'nfl-official',
+     'platform': 'youtube',
+     'playlists_url': 'https://www.youtube.com/c/NFL/playlists',
+     'list_id': 'UUDVYQ4Zhbm3S2dlz7P1GBDg',
+     'upload_url': 'https://www.youtube.com/c/NFL/videos?view=0&sort=dd&shelf_id=430'},
+    {'id': 'android-developers', 'platform': 'youtube', 'list_id': 'UUVHFbqXqoYvEWM1Ddxl0QDg'},
+    {'id': 'ms-courses', 'platform': 'youtube', 'list_id': 'UUJ31x5A6zIdHF5tJhjftyiA'},
+    {'id': 'cnbc-longform', 'platform': 'youtube', 'list_id': 'UUvJJ_dzjViJCoLf5uKUTwoA'},
+    {'id': 'yuezhi', 'platform': 'youtube', 'list_id': 'UUvGkex9MrqV2d4wah9JuANg'},
+    {'id': 'crazy-canton', 'platform': 'youtube', 'list_id': 'UUz_Ceq3mxLeTdCriXUDz72Q'},
+    {'id': 'fox-wc2018', 'platform': 'youtube', 'list_id': 'UUooTLkxcpnTNx6vfOovfBFA'},
+  ],
+  'destinations': [
+    {'id': 'ptx', 'path': local_env.ptx_music_path},
+    {'id': 'cnet', 'path': local_env.rolling_video_path},
+    {'id': 'verge', 'path': local_env.rolling_video_path},
+    {'id': 'cnbc-longform', 'path': local_env.cnbc_path + local_env.cnbc_longform_path},
+    {'id': 'android-developers', 'path': local_env.android_dev_path},
+    {'id': 'healthcare-triage', 'path': local_env.ht_path},
+    {'id': 'ms-courses', 'path': local_env.tech_training_path},
+    {'id': 'coding-arena', 'path': local_env.tech_training_path},
+    {'id': 'yuezhi', 'path': local_env.rolling_video_path},
+    {'id': 'crazy-canton', 'path': local_env.rolling_video_path},
+    {'id': 'nfl-official', 'path': local_env.nfl_hi_res_path},
+    {'id': 'khanacademy', 'path': local_env.khanacademy_hi_res_path},
+    {'id': 'fox-wc2018', 'path': local_env.espn_video_path},
+    {'id': 'tasty-japan', 'path': local_env.recipes_path},
+  ]
+}
+
 vchannels_dict = {
   'platforms': [
     {'id': 'youtube',
@@ -234,19 +450,13 @@ vchannels_dict = {
 
 def lookup_by_source(source):
   d = {}
-  platform_id = ''
-  # data_source = ''
-  list_id = ''
-  upload_url = ''
-  dest_path = ''
-  playlists_url = ''
+  platform_id = list_id = upload_url = dest_path = playlists_url = ''
   for i in vchannels_dict['sources']:
     if i['id'] == source:
       platform_id = i['platform']
       list_id = i['list_id']
       if platform_id == 'youtube':
         upload_url = i['upload_url']
-      # data_source = i['data_source']
       try:
         if i['playlists_url']:
           playlists_url = i['playlists_url']
