@@ -26,10 +26,10 @@ def download_video(url, name, path, ext=".mp4"):
       if os.stat(full_filename).st_size >= 2000:
         pass
       else:
-        subprocess.run("powershell (New-Object net.webclient).DownloadFile({}, {})".format(ps_url, ps_filename), shell=True)
+        subprocess.run(f"powershell (New-Object system.net.webclient).DownloadFile({ps_url}, {ps_filename})", shell=True)
 
     else:
-      subprocess.run("powershell (New-Object net.webclient).DownloadFile({}, {})".format(ps_url, ps_filename), shell=True)
+      subprocess.run(f"powershell (New-Object system.net.webclient).DownloadFile({ps_url}, {ps_filename})", shell=True)
 
   # For Linux OS
   elif os.name == 'posix':
