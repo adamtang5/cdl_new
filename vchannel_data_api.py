@@ -455,7 +455,7 @@ def lookup_by_source(source):
     'data_source': VPLATFORMS[VCHANNELS[source]['platform']]['url_prefix'] +
       VCHANNELS[source]['list_id'] +
       VPLATFORMS[VCHANNELS[source]['platform']]['url_suffix'],
-    'destination_path': VCHANNELS[source]['path'],
+    'destination_path': local_env.video_root + VCHANNELS[source]['path'],
     'low_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['low_res_label'],
     'high_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['high_res_label'],
     'long_form': VPLATFORMS[VCHANNELS[source]['platform']]['long_form'],
