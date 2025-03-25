@@ -7,9 +7,8 @@ What:
   Definition of format ids for multiple platforms: YouTube, ESPN video, etc.
   Template for handling YouTube playlists and ESPN Video categories.
 '''
-
-
-import youtube_dl
+import yt_dlp
+from yt_dlp import YoutubeDL
 import datetime
 import json
 from functools import reduce
@@ -43,7 +42,7 @@ yt_formats = {
 }
 
 
-espn_format_ids = ['http-1200', 'full', 'http-1500']
+espn_format_ids = ['http-1200', 'full']
 twitter_format_ids = ['hls-1280']
 
 '''
@@ -90,7 +89,7 @@ for n in yt_formats['labels'].values():
 
 
 def ydl_get_dict(vid_id):
-  ydl = youtube_dl.YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
+  ydl = YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
 
   with ydl:
     try:
@@ -98,10 +97,10 @@ def ydl_get_dict(vid_id):
         'http://www.youtube.com/watch?v=' + vid_id,
         download=False  # We just want to extract the info
       )
-    except youtube_dl.utils.DownloadError:
+    except yt_dlp.utils.DownloadError:
       print("DownloadError: " + vid_id)
       return ydl_get_dict(vid_id)
-    except youtube_dl.utils.ExtractorError:
+    except yt_dlp.utils.ExtractorError:
       print("ExtractorError: " + vid_id)
 
 
@@ -167,7 +166,7 @@ def ydl_get_dict(vid_id):
 
 
 def ydl_get_dict_espn(vid_id):
-  ydl = youtube_dl.YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
+  ydl = YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
   vid_d = {}
 
   with ydl:
@@ -185,18 +184,21 @@ def ydl_get_dict_espn(vid_id):
         video = result
       print(video)
 
-      vid_d['vid_id'] = video['id']
-      vid_d['title'] = video['title']
-      vid_d['duration'] = video['duration']
-      vid_d['description'] = video['description']
-      vid_d['formats'] = []
+      vid_d = {
+        'vid_id': video['id'],
+        'title': video['title'],
+        'duration': video['duration'],
+        'description': video['description'],
+        'formats': [],
+      }
+
       for vid_format in video['formats']:
         if (vid_format['ext'] == 'mp4') and (vid_format['format_id'] in espn_format_ids):
           vid_d['formats'].append(vid_format)
 
       # print(vid_d)
 
-    except youtube_dl.utils.DownloadError:
+    except yt_dlp.utils.DownloadError:
 
       vid_d['vid_id'] = vid_id
 
@@ -206,7 +208,7 @@ def ydl_get_dict_espn(vid_id):
 # print(ydl_get_dict_espn('29990654'))
 
 def ydl_get_dict_mlb(vid_url):
-  ydl = youtube_dl.YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
+  ydl = YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
 
   with ydl:
     result = ydl.extract_info(
@@ -227,7 +229,7 @@ def ydl_get_dict_mlb(vid_url):
 
 
 def ydl_get_dict_twitter(vid_url):
-  ydl = youtube_dl.YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
+  ydl = YoutubeDL({'outtmpl': '%(id)s%(ext)s', 'quiet': True})
 
   with ydl:
     result = ydl.extract_info(
@@ -274,3 +276,7 @@ def ydl_get_dict_twitter(vid_url):
 
 # print(ydl_get_dict_twitter("https://twitter.com/TastyJapan/status/1156506835081281539"))
 # print(ydl_get_dict_twitter("https://twitter.com/i/status/1160385348117024768"))
+
+# ydl = YoutubeDL()
+# info = ydl.extract_info('https://www.youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA', download=False)
+# print(info)
