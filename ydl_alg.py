@@ -32,36 +32,24 @@ Date: February 12, 2021
 '''
 
 
-def playlist_to_contents_dict(playlist_url):
-  playlist_whole_soup = BeautifulSoup(requests.get(playlist_url).text, "lxml")
-  # print(playlist_whole_soup)
-
-  soup_scripts = playlist_whole_soup.find_all("script")
-  meta_script = ""
-  script_d = {}
-
+def playlist_to_contents_dict(playlist_url, count=40):
+  req_prefix = "https://api.feedly.com/v3/streams/contents?streamId=feed/"
+  req_suffix = f"&count={str(count)}&ranked=newest&similar=true&findUrlDuplicates=true&ck=1742802754783&ct=feedly.desktop&cv=31.0.2623"
+  res = requests.get(req_prefix + playlist_url + req_suffix)
   try:
-    # print(soup_scripts)
-    # meta_script = ""
-    # for s in soup_scripts:
-    #     print(s)
-    #     if re.search("var ytInitialData", s.__dict__["contents"][0]):
-    #         meta_script = s.__dict__["contents"][0]
-    #     break
-    meta_script = soup_scripts[33].__dict__["contents"][0]
-    script_d = json.loads(meta_script.split("ytInitialData = ")[1][:-1])
-    # print(meta_script)
-  except IndexError:
-    print("IndexError")
-    meta_script = soup_scripts[32].__dict__["contents"][0]
-    script_d = json.loads(meta_script.split("ytInitialData = ")[1][:-1])
-    # return []
+    data = res.json()
+  except ValueError:
+    print("Response is not in JSON format")
+    data = None
 
-  contents_d = script_d["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0]["playlistVideoListRenderer"]["contents"]
-
-  # Drop last element in list which does not have "playlistVideoRenderer" index
-  contents_d.pop()
-  return contents_d
+  vids = []
+  if data:
+    for item in data['items']:
+      vids.append({
+        'title': item['title'],
+        'url': item["alternate"][0]["href"],
+      })
+  return vids
 
 # print(playlist_to_contents_dict('https://www.youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA'))
 
@@ -112,20 +100,9 @@ def ydl_playlist_spider(playlist_url, since_date, filter_phrases=[], short_form=
 
   # List of videos rendered in playlist
   for vid in vids_d:
-    try:
-      vid_id = vid["playlistVideoRenderer"]["videoId"]
-      vid_index = vid["playlistVideoRenderer"]["index"]["simpleText"]
+    vid_id = vid['url'].split("?v=")[1]
+    title = vid['title']
 
-      try:
-        title = vid["playlistVideoRenderer"]["title"]["simpleText"]
-      except KeyError:
-        title = vid["playlistVideoRenderer"]["title"]["runs"][0]["text"]
-      # print(vid_id, title)
-
-    except KeyError:
-      pass
-
-    # print(vid_id, title)
     if not(vchannel_data_api.title_checker(filter_phrases, title)):
 
       if not (vid_id in exclude_yt_vid_ids) \
@@ -151,7 +128,6 @@ def ydl_playlist_spider(playlist_url, since_date, filter_phrases=[], short_form=
               else:
                 break
 
-  # print(vids)
   return vids
 
 # print(ydl_playlist_spider("https://www.youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA"))
@@ -247,72 +223,6 @@ def channel_vids_tab_to_playlists_dict(channel_name):
 '''
 
 
-
-
-'''
-Date: July 24, 2020
-Reason for test: YouTube-wide playlist pages no longer contain videos newer than Date
-'''
-
-
-'''Pre 20201207
-def uploads_tab_to_items_dict(uploads_url):
-  uploads_whole_soup = BeautifulSoup(requests.get(uploads_url).text, "html.parser")
-  # print(uploads_whole_soup)
-
-  try:
-    soup_scripts = uploads_whole_soup.find_all("script")
-    # print(soup_scripts[27])
-    meta_script = soup_scripts[27].__dict__["contents"][0]
-    # print(meta_script)
-  except IndexError:
-    print("IndexError")
-    return []
-  else:
-    try:
-      script_d = json.loads(meta_script.split("ytInitialData\"] = ")[1].split(";\n")[0])
-    except IndexError:
-      print(meta_script)
-      print("uploads_tab_to_items_dict IndexError:", uploads_url)
-      # print(meta_script)
-      return uploads_tab_to_items_dict(uploads_url)
-    else:
-      items_d = script_d["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][1]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0]["gridRenderer"]["items"]
-
-  return items_d
-
-# print(uploads_tab_to_items_dict("https://www.youtube.com/c/AmericaUncovered/videos"))
-
-
-def vid_to_contents_dict(vid_url):
-  playlist_whole_soup = BeautifulSoup(requests.get(vid_url).text, "html.parser")
-
-  try:
-    soup_scripts = playlist_whole_soup.find_all("script")
-    # print(soup_scripts)
-    meta_script = soup_scripts[32].__dict__["contents"][0]
-    # print(meta_script)
-  except IndexError:
-    print("Scripts IndexError:", vid_url)
-    return []
-  else:
-    try:
-      script_d = json.loads(meta_script.split("ytInitialData\"] = ")[1].split(";\n")[0])
-    except IndexError:
-      print("Selected Script Content IndexError:", vid_url)
-      # print(meta_script)
-      return vid_to_contents_dict(vid_url)
-    else:
-      try:
-        contents_d = script_d["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]["videoPrimaryInfoRenderer"]
-      except KeyError:
-        contents_d = script_d["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][1]["videoPrimaryInfoRenderer"]
-
-  return contents_d
-
-# print(vid_to_contents_dict("https://www.youtube.com/watch?v=M5G7CjP14oY"))
-
-'''
 
 def uploads_tab_to_items_dict(uploads_url):
   uploads_whole_soup = BeautifulSoup(requests.get(uploads_url).text, "html.parser")
