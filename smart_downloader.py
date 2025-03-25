@@ -78,6 +78,18 @@ def fix_cache(platform):
 
 # fix_cache('espn')
 
+def dedup_cache(platform):
+  file = open(local_env.sdl_cache_path + platform + file_suffix, 'r')
+  dict = json.loads(file.read())
+  file.close()
+
+  dict['vid_ids'] = list(set(dict['vid_ids']))
+
+  file = open(local_env.sdl_cache_path + platform + file_suffix, 'w')
+  file.write(json.dumps(dict))
+  file.close()
+
+# dedup_cache("espn")
 
 authors = ['etcg']
 
