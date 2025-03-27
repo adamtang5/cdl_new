@@ -760,6 +760,35 @@ def ydl_espn_group_spider(url):
   return vids
 
 
+def ydl_espn_archive_spider(url):
+  headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+  source_code = requests.get(url, headers=headers)
+  plain_text = source_code.text
+  # print(plain_text)
+
+  whole_soup = BeautifulSoup(plain_text, "lxml")
+  vids_soup = BeautifulSoup(str(whole_soup.find_all("ul")), "lxml")
+  # print(len(vids_soup.find_all("ul")))
+
+  vids = []
+  for vid_ul in BeautifulSoup(str(vids_soup.find_all("ul")[0]), "lxml"):
+    for vid_li in vid_ul.find_all("li"):
+      vid_li_soup = BeautifulSoup(str(vid_li), "lxml")
+      vid_title = vid_li_soup.find("a").string
+      vid_url = vid_li_soup.find("a").get("href")
+      vid_id = vid_url.split('=')[1]
+
+      if vid_id not in exclude_espn_vid_ids \
+        and not smart_downloader.in_cache('espn', vid_id) \
+        and not vchannel_data_api.title_checker(vchannel_data_api.espn_phrases, vid_title):
+          # print(vid_id, vid_title, vid_url)
+          vids.append(ydl_api_extended.ydl_get_dict_espn(vid_id))
+
+  return vids
+
+# ydl_espn_archive_spider("http://www.espn.com/video/archive")
+
+
 def ydl_download_espn_group(group_name):
   # print(group_name)
   d = vchannel_data_api.lookup_by_source(group_name)
@@ -783,6 +812,27 @@ def ydl_download_espn_group(group_name):
             smart_downloader.append_vid('espn', vids_d['vid_id'])
           else:
             smart_downloader.append_vid('espn', vids_d['vid_id'])
+
+
+  if 'alt_data_source' in d:
+    for vids_d in ydl_espn_archive_spider(d['alt_data_source']):
+      try:
+        vid_name = filename_tools.make_valid(vids_d['title'])
+      except KeyError:
+        smart_downloader.append_vid('espn', vids_d['vid_id'])
+      else:
+        request_url = ''
+        for vid_format in vids_d['formats']:
+          if vid_format['format_id'] in ydl_api_extended.espn_format_ids:
+            request_url = vid_format['url']
+
+            print(re.search("_SOT", request_url, re.IGNORECASE), "URL: " + request_url)
+            if re.search("_SOTFULL", request_url, re.IGNORECASE) == None:
+              # print("URL: " + request_url)
+              udl_alg.download_video(request_url, vid_name, d['destination_path'])
+              smart_downloader.append_vid('espn', vids_d['vid_id'])
+            else:
+              smart_downloader.append_vid('espn', vids_d['vid_id'])
 
 
 '''
