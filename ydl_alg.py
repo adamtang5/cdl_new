@@ -781,8 +781,9 @@ def ydl_espn_archive_spider(url):
       if vid_id not in exclude_espn_vid_ids \
         and not smart_downloader.in_cache('espn', vid_id) \
         and not vchannel_data_api.title_checker(vchannel_data_api.espn_phrases, vid_title):
-          # print(vid_id, vid_title, vid_url)
-          vids.append(ydl_api_extended.ydl_get_dict_espn(vid_id))
+          vid_d = ydl_api_extended.ydl_get_dict_espn(vid_id)
+          if vid_d['duration'] >= 30:
+            vids.append(vid_d)
 
   return vids
 
