@@ -199,34 +199,8 @@ def ydl_download_playlist(playlist_name, since_date, format=ydl_api_extended.yt_
       smart_downloader.append_vid('youtube', vids_d['vid_id'])
 
 
-'''
-def channel_vids_tab_to_playlists_dict(channel_name):
-  d = vchannel_data_api.lookup_by_source(channel_name)
-  # print(d)
-  playlists_whole_soup = BeautifulSoup(requests.get(d['playlists_url']).text, "html.parser")
-  # print(playlists_whole_soup)
-
-  try:
-    soup_scripts = playlists_whole_soup.find_all("script")
-    # print(soup_scripts)
-    bingo_script = soup_scripts[27].__dict__["contents"][0]
-    # print(bingo_script)
-  except IndexError:
-    print("IndexError")
-    return []
-  else:
-    script_d = json.loads(bingo_script.split("ytInitialData = ")[1][:-1])
-    playlists_d = script_d["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][2]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0]["gridRenderer"]["items"]
-    return playlists_d
-
-# channel_vids_tab_to_playlists_dict('nfl-official')
-'''
-
-
-
 def uploads_tab_to_items_dict(uploads_url):
   uploads_whole_soup = BeautifulSoup(requests.get(uploads_url).text, "html.parser")
-  # print(uploads_whole_soup)
 
   try:
     soup_scripts = uploads_whole_soup.find_all("script")
@@ -321,47 +295,6 @@ def ydl_download_playlist_old(playlist_name, since_date, format=ydl_api_extended
       udl_alg.download_video(request_url, vid_name, d['destination_path'])
       smart_downloader.append_vid('youtube', vids_d['vid_id'])
 
-
-'''
-def ydl_playlist_spider(playlist_url, since_date, filter_phrases=[], short_form=True):
-  vids = []
-
-  contents_d = playlist_to_contents_dict(playlist_url)
-
-  # List of videos rendered in playlist
-  for vid in contents_d:
-    vid_id = vid["playlistVideoRenderer"]["videoId"]
-    # print("videoID: ", vid_id)
-    title = vid["playlistVideoRenderer"]["title"]["simpleText"]
-    # print("title: ", title)
-    # print("index: ", vid["playlistVideoRenderer"]["index"]["simpleText"])
-    # print("length: ", vid["playlistVideoRenderer"]["lengthSeconds"])
-
-
-    if not(vchannel_data_api.title_checker(filter_phrases, title)):
-
-      if not (vid_id in exclude_yt_vid_ids) \
-          and not (smart_downloader.in_cache('youtube', vid_id)):
-        ydl_dict = ydl_api_extended.ydl_get_dict(vid_id)
-        # print(ydl_dict)
-
-        if ydl_dict['formats']:
-          ydl_dict['title'] = title   # since ydl is unable to extract video titles
-          if ydl_dict['pub_date'] >= since_date:
-            if not short_form:
-              print(vid_id, ydl_dict['title'])
-              vids.append(ydl_dict)
-            else:
-              if ydl_dict['duration'] < 1200:
-                print(vid_id, ydl_dict['title'])
-                vids.append(ydl_dict)
-          else:
-            break
-  # print(vids)
-  return vids
-
-# print(ydl_playlist_spider("https://youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA", datetime.date(2019, 4, 14)))
-'''
 
 
 def ydl_single_video(vid_url, playlist_name='espn-yt', format=ydl_api_extended.yt_formats['labels']['low_res']):
