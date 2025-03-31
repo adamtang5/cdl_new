@@ -805,8 +805,17 @@ def ydl_mlb_group_spider(url, since_date):
 
   return vids
 
-print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 3, 30)))
+# print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 3, 30)))
 
+
+def ydl_download_mlb_group(group_url, since_date):
+  for vids_d in ydl_espn_group_spider(group_url):
+    try:
+      vid_name = filename_tools.make_valid(vids_d['title'])
+    except KeyError:
+      print("KeyError")
+    else:
+      pass
 
 '''
 CUAU Profile:
