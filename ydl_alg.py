@@ -770,6 +770,34 @@ def ydl_download_espn_group(group_name):
 
 
 '''
+MLB Profile:
+* Format: 'medium'
+* Filters: NO
+* Naming Rules: YES
+'''
+
+def ydl_mlb_group_spider(url):
+  site_prefix = 'https://www.mlb.com'
+
+  headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+  source_code = requests.get(url, headers=headers)
+  plain_text = source_code.text
+  # print(plain_text)
+
+  whole_soup = BeautifulSoup(plain_text, "lxml")
+  # print(whole_soup)
+  for card in whole_soup.select('a[class*="ContentCard__Card-sc-"]'):
+    vid_url = site_prefix + card.get("href")
+    vid_length = card.select('p[class*="ContentCard__Duration-sc"]')[0].string
+    vid_title = card.select('h3[class*="ContentCard__Title-sc"]')[0].string
+    vid_date = card.select('p[class*="ContentCard__Date-sc"]')[0].string
+    print(vid_url, vid_title, vid_date, vid_length)
+
+
+ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps')
+
+
+'''
 CUAU Profile:
 * Format: 'medium'
 * Filters: NO
