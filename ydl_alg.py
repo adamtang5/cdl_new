@@ -776,7 +776,7 @@ MLB Profile:
 * Naming Rules: YES
 '''
 
-def ydl_mlb_group_spider(url):
+def ydl_mlb_group_spider(url, since_date):
   site_prefix = 'https://www.mlb.com'
 
   headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
@@ -786,15 +786,26 @@ def ydl_mlb_group_spider(url):
 
   whole_soup = BeautifulSoup(plain_text, "lxml")
   # print(whole_soup)
+
+  vids = []
   for card in whole_soup.select('a[class*="ContentCard__Card-sc-"]'):
     vid_url = site_prefix + card.get("href")
     vid_length = card.select('p[class*="ContentCard__Duration-sc"]')[0].string
     vid_title = card.select('h3[class*="ContentCard__Title-sc"]')[0].string
-    vid_date = card.select('p[class*="ContentCard__Date-sc"]')[0].string
-    print(vid_url, vid_title, vid_date, vid_length)
+    vid_date = datetime.datetime.strptime(card.select('p[class*="ContentCard__Date-sc"]')[0].string, "%B %d, %Y").date()
+    # print(vid_url, vid_title, vid_date, vid_length)
 
+    if vid_date >= since_date:
+      vids.append({
+        'url': vid_url,
+        'title': vid_title,
+        'date': vid_date,
+        'length': vid_length,
+      })
 
-ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps')
+  return vids
+
+print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 3, 30)))
 
 
 '''
