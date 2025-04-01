@@ -20,6 +20,7 @@ def download_video(url, name, path, ext=".mp4"):
   # For Windows OS
   if os.name == 'nt':
     ps_url = "'" + filename_tools.prep_ps_url(url) + "'"
+    print(ps_url)
     ps_filename = "'" + filename_tools.prep_ps_filename(full_filename) + "'"
 
     if os.path.isfile(full_filename):
