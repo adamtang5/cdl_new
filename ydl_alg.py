@@ -715,7 +715,7 @@ def ydl_espn_archive_spider(url):
         and not smart_downloader.in_cache('espn', vid_id) \
         and not vchannel_data_api.title_checker(vchannel_data_api.espn_phrases, vid_title):
           vid_d = ydl_api_extended.ydl_get_dict_espn(vid_id)
-          if vid_d['duration'] >= 30:
+          if 'duration' in vid_d and vid_d['duration'] >= 30:
             vids.append(vid_d)
 
   return vids
@@ -818,10 +818,10 @@ def ydl_download_mlb_group(group_url, since_date):
       pass
 
 
-udl_alg.download_video(
-  'https://mlb-cuts-diamond.mlb.com/FORGE/2025/2025-03/31/f5088e44-b754f098-6b50a13e-csvm-diamondgcp-asset.m3u8',
-  '20250331-WSH-TOR.mp4',
-  local_env.espn_video_path)
+# udl_alg.download_video(
+#   'https://mlb-cuts-diamond.mlb.com/FORGE/2025/2025-03/31/f5088e44-b754f098-6b50a13e-csvm-diamondgcp-asset.m3u8',
+#   '20250331-WSH-TOR.mp4',
+#   local_env.espn_video_path)
 
 '''
 CUAU Profile:
