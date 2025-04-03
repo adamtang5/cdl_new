@@ -789,23 +789,24 @@ def ydl_mlb_group_spider(url, since_date):
 
   vids = []
   for card in whole_soup.select('a[class*="ContentCard__Card-sc-"]'):
-    vid_url = site_prefix + card.get("href")
+    vid_page_url = site_prefix + card.get("href")
     vid_length = card.select('p[class*="ContentCard__Duration-sc"]')[0].string
     vid_title = card.select('h3[class*="ContentCard__Title-sc"]')[0].string
     vid_date = datetime.datetime.strptime(card.select('p[class*="ContentCard__Date-sc"]')[0].string, "%B %d, %Y").date()
     # print(vid_url, vid_title, vid_date, vid_length)
 
     if vid_date >= since_date:
-      vids.append({
-        'url': vid_url,
-        'title': vid_title,
-        'date': vid_date,
-        'length': vid_length,
-      })
+      if ydl_api_extended.ydl_get_dict_mlb(vid_page_url):
+        vids.append({
+          'url': ydl_api_extended.ydl_get_dict_mlb(vid_page_url),
+          'title': vid_title,
+          'date': vid_date,
+          'length': vid_length,
+        })
 
   return vids
 
-# print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 3, 30)))
+print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 4, 1)))
 
 
 def ydl_download_mlb_group(group_url, since_date):

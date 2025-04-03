@@ -223,9 +223,14 @@ def ydl_get_dict_mlb(vid_url):
     # Just a video
     video = result
 
-  print(video)
+  # print(video)
 
-# ydl_get_dict_mlb("https://www.mlb.com/video/business-of-baseball-mets")
+  for format in video['formats']:
+    if format['format_id'] == 'hlsCloud-1260':
+      return format['url']
+
+
+# ydl_get_dict_mlb("https://www.mlb.com/video/pirates-vs-rays-highlights-x6252")
 
 
 def ydl_get_dict_twitter(vid_url):
