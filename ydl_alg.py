@@ -798,15 +798,17 @@ def ydl_mlb_group_spider(url, since_date):
     if vid_date >= since_date:
       if ydl_api_extended.ydl_get_dict_mlb(vid_page_url):
         vids.append({
-          'url': ydl_api_extended.ydl_get_dict_mlb(vid_page_url),
+          'url': ydl_api_extended.ydl_get_dict_mlb(vid_page_url)['url'],
+          # 'formats': ydl_api_extended.ydl_get_dict_mlb(vid_page_url),
           'title': vid_title,
           'date': vid_date,
           'length': vid_length,
         })
 
+  print(len(vids))
   return vids
 
-print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 4, 1)))
+print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 4, 5)))
 
 
 def ydl_download_mlb_group(group_url, since_date):

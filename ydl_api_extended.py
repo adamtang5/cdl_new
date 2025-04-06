@@ -44,6 +44,7 @@ yt_formats = {
 
 espn_format_ids = ['http-1200', 'full']
 twitter_format_ids = ['hls-1280']
+MLB_FORMAT_IDS = ['hlsCloud-1260', 'hlsCloud-2590']
 
 '''
 Inputs: list of formats, criteria to look for (e.g. height, or format_note), function to optimize with (e.g. min)
@@ -226,9 +227,11 @@ def ydl_get_dict_mlb(vid_url):
   # print(video)
 
   for format in video['formats']:
-    if format['format_id'] == 'hlsCloud-1260':
-      return format['url']
-
+    if '-' in format['format_id'] and 1000 <= int(format['format_id'].split('-')[1]) <= 1500:
+      return {
+        'format_id': format['format_id'],
+        'url': format['url'],
+      }
 
 # ydl_get_dict_mlb("https://www.mlb.com/video/pirates-vs-rays-highlights-x6252")
 
