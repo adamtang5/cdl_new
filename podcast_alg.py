@@ -10,11 +10,12 @@ import datetime
 import datetime_tools
 import urllib.request
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 import re
 import local_env
 import udl_alg
 import vchannel_data_api
+import warnings
 
 
 # RTHK Morning News
@@ -60,7 +61,8 @@ def espn_podcenter_downloader(pod_name, since_date):
   plain_text = source_code.text
   # print(plain_text)
 
-  whole_soup = BeautifulSoup(plain_text, 'lxml')
+  warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+  whole_soup = BeautifulSoup(plain_text, "lxml")
   urls = []
   for item in whole_soup.find_all("item"):
     title = item.find("title").string
