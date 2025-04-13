@@ -486,7 +486,7 @@ def lookup_by_source(source):
     'data_source': VPLATFORMS[VCHANNELS[source]['platform']]['url_prefix'] +
       VCHANNELS[source]['list_id'] +
       VPLATFORMS[VCHANNELS[source]['platform']]['url_suffix'],
-    'alt_data_source': VCHANNELS[source]['archive_url'] if VCHANNELS[source]['archive_url'] else '',
+    'alt_data_source': VCHANNELS[source]['archive_url'] if 'archive_url' in VCHANNELS[source] else '',
     'destination_path': local_env.video_root + VCHANNELS[source]['path'],
     'low_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['low_res_label'],
     'high_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['high_res_label'],
