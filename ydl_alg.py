@@ -19,6 +19,7 @@ import re
 import json
 import local_env
 import os
+import m3u8_To_MP4
 
 
 exclude_yt_vid_ids = []
@@ -486,7 +487,6 @@ def ydl_cnbc_spider(since_date):
   vids = []
   for vids_row_li in vids_table_soup.find_all("tr", ["pl-video", "yt-uix-tile"]):
     title = vids_row_li.get("data-title")
-    #print(title)
     if not(vchannel_data_api.title_checker(vchannel_data_api.cnbc_phrases, title)):
       vids_row_soup = BeautifulSoup(str(vids_row_li),"lxml")
       href = vids_row_soup.find("a", "pl-video-title-link").get("href")
@@ -788,12 +788,12 @@ def ydl_mlb_group_spider(url, since_date):
   # print(whole_soup)
 
   vids = []
-  for card in whole_soup.select('a[class*="ContentCard__Card-sc-"]'):
+  for card in whole_soup.select('a[class*="cardstyle__Wrapper-sc-"]'):
     vid_page_url = site_prefix + card.get("href")
     vid_length = card.select('p[class*="ContentCard__Duration-sc"]')[0].string
     vid_title = card.select('h3[class*="ContentCard__Title-sc"]')[0].string
     vid_date = datetime.datetime.strptime(card.select('p[class*="ContentCard__Date-sc"]')[0].string, "%B %d, %Y").date()
-    # print(vid_url, vid_title, vid_date, vid_length)
+    # print(vid_page_url, vid_title, vid_date, vid_length)
 
     if vid_date >= since_date:
       if ydl_api_extended.ydl_get_dict_mlb(vid_page_url):
@@ -808,18 +808,55 @@ def ydl_mlb_group_spider(url, since_date):
   print(len(vids))
   return vids
 
-print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 4, 5)))
+# print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 4, 5)))
 
 
 def ydl_download_mlb_group(group_url, since_date):
-  for vids_d in ydl_espn_group_spider(group_url):
-    try:
-      vid_name = filename_tools.make_valid(vids_d['title'])
-    except KeyError:
-      print("KeyError")
-    else:
-      pass
+  def generate_mlb_recap_file_name(vid):
+    team_codes = {
+      'D-backs': 'AZ',
+      'Diamondbacks': 'AZ',
+      'Athletics': 'ATH',
+      'Braves': 'ATL',
+      'Orioles': 'BAL',
+      'Red Sox': 'BOS',
+      'Cubs': 'CHC',
+      'White Sox': 'CHW',
+      'Reds': 'CIN',
+      'Guardians': 'CLE',
+      'Rockies': 'COL',
+      'Tigers': 'DET',
+      'Astros': 'HOU',
+      'Royals': 'KC',
+      'Angels': 'LAA',
+      'Dodgers': 'LAD',
+      'Marlins': 'MIA',
+      'Brewers': 'MIL',
+      'Twins': 'MIN',
+      'Mets': 'NYM',
+      'Yankees': 'NYY',
+      'Phillies': 'PHI',
+      'Pirates': 'PIT',
+      'Padres': 'SD',
+      'Giants': 'SF',
+      'Mariners': 'SEA',
+      'Cardinals': 'STL',
+      'Rays': 'TB',
+      'Rangers': 'TEX',
+      'Blue Jays': 'TOR',
+      'Nationals': 'WSH',
+    }
 
+    date_str = vid['date'].strftime("%Y%m%d")
+    road_team_str = team_codes[vid['title'].split("vs.")[0].strip()]
+    home_team_str = team_codes[vid['title'].split("vs.")[1].split('Highlights')[0].strip()]
+    return f"{date_str}_{road_team_str}_{home_team_str}.mp4"
+
+  for vid in ydl_mlb_group_spider(group_url, since_date):
+    print(vid['url'], local_env.video_root + vchannel_data_api.VCHANNELS['mlb']['path'] + generate_mlb_recap_file_name(vid))
+    m3u8_To_MP4.multithread_download(vid['url'], local_env.video_root + vchannel_data_api.VCHANNELS['mlb']['path'] + generate_mlb_recap_file_name(vid))
+
+ydl_download_mlb_group('https://www.mlb.com/video/topic/daily-recaps', datetime_tools.day_before(datetime.date.today()))
 
 # udl_alg.download_video(
 #   'https://mlb-cuts-diamond.mlb.com/FORGE/2025/2025-03/31/f5088e44-b754f098-6b50a13e-csvm-diamondgcp-asset.m3u8',
@@ -1315,151 +1352,3 @@ def ydl_playlist_spider_obsolete(playlist_url, since_date, filter_phrases=[], sh
       return vids
 
 # print(ydl_playlist_spider_obsolete("https://www.youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA", datetime.date(2021, 2, 10)))
-
-
-'''
-def ydl_etcg_spider(since_date):
-  vids = []
-
-  playlist_url = vchannel_data_api.lookup_by_source('etcg')['data_source']
-  playlist_whole_soup = BeautifulSoup(requests.get(playlist_url).text, "lxml")
-  vids_table_soup = BeautifulSoup(str(playlist_whole_soup.find_all("tbody")[0]), "lxml")
-  # print(vids_table_soup)
-
-  for vids_row_li in vids_table_soup.find_all("tr", ["pl-video", "yt-uix-tile"]):
-    vids_row_soup = BeautifulSoup(str(vids_row_li),"lxml")
-    href = vids_row_soup.find("a", "pl-video-title-link").get("href")
-    vid_id = href.split("?v=")[1].split("&")[0]
-
-    ydl_dict = ydl_api_extended.ydl_get_dict(vid_id)
-    # print(ydl_dict)
-    title = ydl_dict['title']
-
-    cache_title = filename_tools.make_valid(filename_tools.prep_comp_string(title))
-    # print(vid_id, comp_title)
-
-    if not (vid_id in exclude_yt_vid_ids) \
-        and not (smart_downloader.in_cache('youtube', vid_id)):
-      if smart_downloader.etcg_title_in_cache(cache_title):
-        smart_downloader.sync_etcg_cache(cache_title, 'youtube', vid_id)
-
-      else:
-        if ydl_dict['formats'] and (ydl_dict['pub_date'] >= since_date):
-          print(vid_id, ydl_dict['title'])
-          vids.append(ydl_dict)
-        else:
-          break
-
-  playlist_url = vchannel_data_api.lookup_by_source('etcg-dailyblob')['data_source']
-  playlist_whole_soup = BeautifulSoup(requests.get(playlist_url).text, "lxml")
-  vids_table_soup = BeautifulSoup(str(playlist_whole_soup.find_all("tbody")[0]), "lxml")
-  # print(vids_table_soup)
-
-  for vids_row_li in vids_table_soup.find_all("tr", ["pl-video", "yt-uix-tile"]):
-    vids_row_soup = BeautifulSoup(str(vids_row_li), "lxml")
-    href = vids_row_soup.find("a", "pl-video-title-link").get("href")
-    vid_id = href.split("?v=")[1].split("&")[0]
-
-    ydl_dict = ydl_api_extended.ydl_get_dict(vid_id)
-    # print(ydl_dict)
-    title = ydl_dict['title']
-
-    cache_title = filename_tools.make_valid(filename_tools.prep_comp_string(title))
-    # print(vid_id, comp_title)
-
-    if not (vid_id in exclude_yt_vid_ids) \
-      and not (smart_downloader.in_cache('youtube', vid_id)):
-      if smart_downloader.etcg_title_in_cache(cache_title):
-        smart_downloader.sync_etcg_cache(cache_title, 'youtube', vid_id)
-
-      else:
-        if ydl_dict['formats'] and (ydl_dict['pub_date'] >= since_date):
-          print(vid_id, ydl_dict['title'])
-          vids.append(ydl_dict)
-        else:
-          break
-
-  return vids
-'''
-
-
-'''
-def ydl_etcg_spider_old(playlist_url, since_date):
-  vids = []
-
-  contents_d = playlist_to_contents_dict(playlist_url)
-
-  # List of videos rendered in playlist
-  for vid in contents_d:
-    vid_id = vid["playlistVideoRenderer"]["videoId"]
-    # print("videoID: ", vid_id)
-    title = vid["playlistVideoRenderer"]["title"]["simpleText"]
-    # print("title: ", title)
-    # print("index: ", vid["playlistVideoRenderer"]["index"]["simpleText"])
-    # print("length: ", vid["playlistVideoRenderer"]["lengthSeconds"])
-    vid_url = "https://www.youtube.com/watch?v=" + vid_id
-
-    if not (vid_id in exclude_yt_vid_ids) and not (smart_downloader.in_cache('youtube', vid_id)):
-      vid_contents_d = vid_to_contents_dict(vid_url)
-      # print(vid_contents_d)
-
-      vid_title = vid_contents_d["title"]["runs"][0]["text"]
-      vid_dateText = vid_contents_d["dateText"]["simpleText"]
-      # print(vid_title, vid_dateText)
-
-      # if 'Premieres' doesn't appear in date_slot_str
-      if vid_dateText.find(ydl_api_extended.verbage6) == -1:
-        # print(vid_id, title)
-
-        ydl_dict = ydl_api_extended.ydl_get_dict(vid_id)
-        # print(ydl_dict)
-        title = ydl_dict['title']
-
-        cache_title = filename_tools.make_valid(filename_tools.prep_comp_string(title))
-        # print(vid_id, comp_title)
-
-        if ydl_dict['formats'] and (ydl_dict['pub_date'] >= since_date):
-          if smart_downloader.etcg_title_in_cache(cache_title):
-            smart_downloader.sync_etcg_cache(cache_title, 'youtube', vid_id)
-          else:
-            print(vid_id, ydl_dict['title'], vid_dateText)
-            vids.append(ydl_dict)
-            # print("Appended: ", ydl_dict)
-        else:
-          break
-
-  # print(vids)
-  return vids
-
-# print(ydl_etcg_spider(datetime.date(2020, 5, 1)))
-# print(ydl_playlist_spider("https://youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA", datetime.date(2019, 4, 14)))
-# print(ydl_etcg_spider(vchannel_data_api.lookup_by_source('etcg')['data_source'], datetime.date(2019, 9, 10)))
-
-def ydl_download_etcg_old(playlist_name, since_date, format=ydl_api_extended.yt_formats['labels']['low_res']):
-  d = vchannel_data_api.lookup_by_source(playlist_name)
-
-  try:
-    vids = ydl_etcg_spider_old(d['data_source'], since_date)
-    print(playlist_name, vids)
-  except TypeError:
-    pass
-  else:
-    for vids_d in vids:
-      vid_name = filename_tools.make_valid(vids_d['title'])
-      datestr = vids_d['upload_date']
-
-      request_url = ''
-      for vid_format in vids_d['formats']:
-        if vid_format[ydl_api_extended.yt_formats['criteria']] == format:
-          request_url = vid_format['url']
-
-      print("URL: " + request_url)
-      udl_alg.download_video(request_url, datestr + ' - ' + vid_name, d['destination_path'], ext=".mp4")
-      smart_downloader.append_vid('youtube', vids_d['vid_id'])
-
-      # ETCG Vid Cache JSON
-      cache_title = filename_tools.make_valid(filename_tools.prep_comp_string(vids_d['title']))
-
-      smart_downloader.sync_etcg_cache(cache_title, 'youtube', vids_d['vid_id'])
-'''
-
