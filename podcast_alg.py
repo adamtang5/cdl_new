@@ -144,6 +144,7 @@ def mlb_podcast_downloader(pod_name, since_date):
   plain_text = source_code.text
   #print(plain_text)
 
+  warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
   whole_soup = BeautifulSoup(plain_text, 'lxml')
   urls = []
   for item in whole_soup.find_all("item"):
@@ -269,6 +270,7 @@ def sn_downloader(pod_name, since_date):
   plain_text = source_code.text
   #print(plain_text)
 
+  warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
   whole_soup = BeautifulSoup(plain_text, 'lxml')
   urls = []
   for item in whole_soup.find_all("item"):
