@@ -20,6 +20,7 @@ import json
 import local_env
 import os
 import m3u8_To_MP4
+from pathlib import Path
 
 
 exclude_yt_vid_ids = []
@@ -33,7 +34,7 @@ Date: February 12, 2021
 '''
 
 
-def playlist_to_contents_dict(playlist_url, count=40):
+def playlist_to_contents_dict(playlist_url, count=80):
   req_prefix = "https://api.feedly.com/v3/streams/contents?streamId=feed/"
   req_suffix = f"&count={str(count)}&ranked=newest&similar=true&findUrlDuplicates=true&ck=1742802754783&ct=feedly.desktop&cv=31.0.2623"
   res = requests.get(req_prefix + playlist_url + req_suffix)
@@ -132,50 +133,6 @@ def ydl_playlist_spider(playlist_url, since_date, filter_phrases=[], short_form=
   return vids
 
 # print(ydl_playlist_spider("https://www.youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA"))
-
-
-def ydl_playlist_spider_20210212(playlist_url, since_date, filter_phrases=[], short_form=True):
-  playlist_whole_soup = BeautifulSoup(requests.get(playlist_url).text, "lxml")
-  # print(playlist_whole_soup)
-  vids_d = []
-
-  try:
-    soup_scripts = playlist_whole_soup.find_all("script")
-    # print(soup_scripts)
-    meta_script = soup_scripts[32].__dict__["contents"][0]
-    # print(meta_script)
-  except IndexError:
-    print("ydl_playlist_spider IndexError")
-    return vids_d
-    pass
-  else:
-    # print(vids_d)
-
-    vids = []
-
-    # List of videos rendered in playlist
-    for vid in vids:
-      vid_id = vid["playlistVideoRenderer"]["videoId"]
-      vid_index = vid["playlistVideoRenderer"]["index"]["simpleText"]
-      title = ''
-
-      try:
-        title = vid["playlistVideoRenderer"]["title"]["simpleText"]
-      except KeyError:
-        title = vid["playlistVideoRenderer"]["title"]["runs"][0]["text"]
-      # print(vid_id, title)
-
-      if not (smart_downloader.in_cache('youtube', vid_id)):
-        print(vid_id, title)
-        ydl_dict = ydl_api_extended.ydl_get_dict(vid_id)
-        ydl_dict["vid_index"] = vid_index
-        vids.append(ydl_dict)
-
-    # print(vids)
-    return vids
-
-
-# print(ydl_playlist_spider_20210212("https://www.youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA", datetime.date(2021, 2, 10)))
 
 
 def ydl_download_playlist(playlist_name, since_date, format=ydl_api_extended.yt_formats['labels']['low_res'], short_form=True):
@@ -795,7 +752,7 @@ def ydl_mlb_group_spider(url, since_date):
     vid_date = datetime.datetime.strptime(card.select('p[class*="ContentCard__Date-sc"]')[0].string, "%B %d, %Y").date()
     # print(vid_page_url, vid_title, vid_date, vid_length)
 
-    if vid_date >= since_date:
+    if vid_date == since_date:
       if ydl_api_extended.ydl_get_dict_mlb(vid_page_url):
         vids.append({
           'url': ydl_api_extended.ydl_get_dict_mlb(vid_page_url)['url'],
@@ -811,52 +768,60 @@ def ydl_mlb_group_spider(url, since_date):
 # print(ydl_mlb_group_spider('https://www.mlb.com/video/topic/daily-recaps', datetime.date(2025, 4, 5)))
 
 
+def generate_mlb_recap_file_name(vid):
+  team_codes = {
+    'D-backs': 'AZ',
+    'Diamondbacks': 'AZ',
+    'Athletics': 'ATH',
+    'Braves': 'ATL',
+    'Orioles': 'BAL',
+    'Red Sox': 'BOS',
+    'Cubs': 'CHC',
+    'White Sox': 'CHW',
+    'Reds': 'CIN',
+    'Guardians': 'CLE',
+    'Rockies': 'COL',
+    'Tigers': 'DET',
+    'Astros': 'HOU',
+    'Royals': 'KC',
+    'Angels': 'LAA',
+    'Dodgers': 'LAD',
+    'Marlins': 'MIA',
+    'Brewers': 'MIL',
+    'Twins': 'MIN',
+    'Mets': 'NYM',
+    'Yankees': 'NYY',
+    'Phillies': 'PHI',
+    'Pirates': 'PIT',
+    'Padres': 'SD',
+    'Giants': 'SF',
+    'Mariners': 'SEA',
+    'Cardinals': 'STL',
+    'Rays': 'TB',
+    'Rangers': 'TEX',
+    'Blue Jays': 'TOR',
+    'Nationals': 'WSH',
+  }
+
+  date_str = vid['date'].strftime("%Y%m%d")
+  road_team_str = team_codes[vid['title'].split("vs.")[0].strip()]
+  home_team_str = team_codes[vid['title'].split("vs.")[1].split('Highlights')[0].strip()]
+  return f"{date_str}_{road_team_str}_{home_team_str}.mp4"
+
 def ydl_download_mlb_group(group_url, since_date):
-  def generate_mlb_recap_file_name(vid):
-    team_codes = {
-      'D-backs': 'AZ',
-      'Diamondbacks': 'AZ',
-      'Athletics': 'ATH',
-      'Braves': 'ATL',
-      'Orioles': 'BAL',
-      'Red Sox': 'BOS',
-      'Cubs': 'CHC',
-      'White Sox': 'CHW',
-      'Reds': 'CIN',
-      'Guardians': 'CLE',
-      'Rockies': 'COL',
-      'Tigers': 'DET',
-      'Astros': 'HOU',
-      'Royals': 'KC',
-      'Angels': 'LAA',
-      'Dodgers': 'LAD',
-      'Marlins': 'MIA',
-      'Brewers': 'MIL',
-      'Twins': 'MIN',
-      'Mets': 'NYM',
-      'Yankees': 'NYY',
-      'Phillies': 'PHI',
-      'Pirates': 'PIT',
-      'Padres': 'SD',
-      'Giants': 'SF',
-      'Mariners': 'SEA',
-      'Cardinals': 'STL',
-      'Rays': 'TB',
-      'Rangers': 'TEX',
-      'Blue Jays': 'TOR',
-      'Nationals': 'WSH',
-    }
-
-    date_str = vid['date'].strftime("%Y%m%d")
-    road_team_str = team_codes[vid['title'].split("vs.")[0].strip()]
-    home_team_str = team_codes[vid['title'].split("vs.")[1].split('Highlights')[0].strip()]
-    return f"{date_str}_{road_team_str}_{home_team_str}.mp4"
-
   for vid in ydl_mlb_group_spider(group_url, since_date):
-    print(vid['url'], local_env.video_root + vchannel_data_api.VCHANNELS['mlb']['path'] + generate_mlb_recap_file_name(vid))
-    m3u8_To_MP4.multithread_download(vid['url'], local_env.video_root + vchannel_data_api.VCHANNELS['mlb']['path'] + generate_mlb_recap_file_name(vid))
+    dest_file_path = local_env.video_root + vchannel_data_api.VCHANNELS['mlb']['path']
+    dest_filename = generate_mlb_recap_file_name(vid)
+    # print(vid['url'], dest_file_path + dest_filename)
+    # Path(dest_file_path + dest_filename).touch()
 
-ydl_download_mlb_group('https://www.mlb.com/video/topic/daily-recaps', datetime_tools.day_before(datetime.date.today()))
+    m3u8_To_MP4.async_download(
+      vid['url'],
+      mp4_file_dir=dest_file_path,
+      mp4_file_name=dest_filename,
+    )
+
+# ydl_download_mlb_group('https://www.mlb.com/video/topic/daily-recaps', datetime_tools.day_before(datetime.date.today()))
 
 # udl_alg.download_video(
 #   'https://mlb-cuts-diamond.mlb.com/FORGE/2025/2025-03/31/f5088e44-b754f098-6b50a13e-csvm-diamondgcp-asset.m3u8',
