@@ -479,7 +479,7 @@ vchannels_dict = {
   ]
 }
 
-def lookup_by_source(source):
+def lookup_by_source(source: str) -> dict[str, str]:
   return {
     'id': source,
     'platform': VCHANNELS[source]['platform'],
