@@ -135,12 +135,22 @@ def ydl_playlist_spider(playlist_url, since_date, filter_phrases=[], short_form=
 # print(ydl_playlist_spider("https://www.youtube.com/playlist?list=UUvJJ_dzjViJCoLf5uKUTwoA"))
 
 
-def ydl_download_playlist(playlist_name, since_date, format=ydl_api_extended.yt_formats['labels']['low_res'], short_form=True):
+def ydl_download_playlist(
+  playlist_name: str,
+  since_date: datetime.date,
+  format: dict[str, str | dict[str, str]] = ydl_api_extended.yt_formats['labels']['low_res'],
+  short_form: bool = True
+) -> None:
   d = vchannel_data_api.lookup_by_source(playlist_name)
   # print(d)
 
   try:
-    vids = ydl_playlist_spider(d['data_source'], since_date, vchannel_data_api.lookup_filter_by_creator(playlist_name), short_form)
+    vids = ydl_playlist_spider(
+      d['data_source'],
+      since_date,
+      vchannel_data_api.lookup_filter_by_creator(playlist_name),
+      short_form
+    )
     print(playlist_name, vids)
   except TypeError:
     pass
