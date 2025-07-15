@@ -7,7 +7,7 @@ Better names:
 What:
 Define video channel/playlist (cloud) variables and preferences
 '''
-
+from collections.abc import Callable
 
 import local_env
 import filename_tools
@@ -840,12 +840,12 @@ agg_naming_rules = [
   {'creator_id': 'play ball', 'naming_rule': mlb_pb_naming_rules}
 ]
 
-def lookup_naming_rules_by_creator(creator_id):
+def lookup_naming_rules_by_creator(creator_id: str) -> Callable[str, str]:
   ans = identity
 
-  for rules in agg_naming_rules:
-    if rules['creator_id'] == creator_id:
-      ans = rules['naming_rule']
+  for rule in agg_naming_rules:
+    if rule['creator_id'] == creator_id:
+      ans = rule['naming_rule']
       break
 
   return ans
