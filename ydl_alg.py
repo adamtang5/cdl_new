@@ -93,7 +93,12 @@ def ydl_filter_by_date(vids_d, since_date):
 
 
 
-def ydl_playlist_spider(playlist_url, since_date, filter_phrases=[], short_form=True):
+def ydl_playlist_spider(
+  playlist_url: str,
+  since_date: datetime.date,
+  filter_phrases: [str] = [],
+  short_form: bool = True
+) -> dict:
   vids_d = playlist_to_contents_dict(playlist_url)
   # print(vids_d)
 
