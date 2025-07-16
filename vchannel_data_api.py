@@ -840,7 +840,7 @@ agg_naming_rules = [
   {'creator_id': 'play ball', 'naming_rule': mlb_pb_naming_rules}
 ]
 
-def lookup_naming_rules_by_creator(creator_id: str) -> Callable[str, str]:
+def lookup_naming_rules_by_creator(creator_id: str) -> Callable[[str], str]:
   ans = identity
 
   for rule in agg_naming_rules:
