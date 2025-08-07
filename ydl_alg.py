@@ -704,7 +704,10 @@ def ydl_download_espn_group(group_name):
 
   def stage(data):
     for vids_d in data:
-      if not smart_downloader.in_cache('espn', vids_d['vid_id']) and vids_d['duration'] >= 30:
+      if not smart_downloader.in_cache('espn', vids_d['vid_id']) and \
+        'duration' in vids_d and \
+        vids_d['duration'] >= 30:
+
         vid = {
           'title': vids_d['title'],
           'filename': filename_tools.make_valid(vids_d['title']),
