@@ -700,45 +700,36 @@ def ydl_download_espn_group(group_name):
   d = vchannel_data_api.lookup_by_source(group_name)
   # print(d)
 
-  for vids_d in ydl_espn_group_spider(d['data_source']):
-    try:
-      vid_name = filename_tools.make_valid(vids_d['title'])
-    except KeyError:
-      smart_downloader.append_vid('espn', vids_d['vid_id'])
-    else:
-      request_url = ''
-      for vid_format in vids_d['formats']:
-        if vid_format['format_id'] in ydl_api_extended.espn_format_ids:
-          request_url = vid_format['url']
+  staged_list = {}
 
-          print(re.search("_SOT", request_url, re.IGNORECASE), "URL: " + request_url)
-          if re.search("_SOTFULL", request_url, re.IGNORECASE) == None:
-            # print("URL: " + request_url)
-            udl_alg.download_video(request_url, vid_name, d['destination_path'])
-            smart_downloader.append_vid('espn', vids_d['vid_id'])
-          else:
-            smart_downloader.append_vid('espn', vids_d['vid_id'])
+  def stage(data):
+    for vids_d in data:
+      if not smart_downloader.in_cache('espn', vids_d['vid_id']) and vids_d['duration'] >= 30:
+        vid = {
+          'title': vids_d['title'],
+          'filename': filename_tools.make_valid(vids_d['title']),
+          'duration': vids_d['duration'],
+        }
 
-
-  if 'alt_data_source' in d:
-    for vids_d in ydl_espn_archive_spider(d['alt_data_source']):
-      try:
-        vid_name = filename_tools.make_valid(vids_d['title'])
-      except KeyError:
-        smart_downloader.append_vid('espn', vids_d['vid_id'])
-      else:
-        request_url = ''
         for vid_format in vids_d['formats']:
-          if vid_format['format_id'] in ydl_api_extended.espn_format_ids:
-            request_url = vid_format['url']
+          if 'url' not in vid or 'path' not in vid:
+            vid['url'] = vid_format['url']
+            vid['path'] = d['destination_path']
+          else:
+            break
 
-            print(re.search("_SOT", request_url, re.IGNORECASE), "URL: " + request_url)
-            if re.search("_SOTFULL", request_url, re.IGNORECASE) == None:
-              # print("URL: " + request_url)
-              udl_alg.download_video(request_url, vid_name, d['destination_path'])
-              smart_downloader.append_vid('espn', vids_d['vid_id'])
-            else:
-              smart_downloader.append_vid('espn', vids_d['vid_id'])
+        if vids_d['vid_id'] not in staged_list:
+          staged_list[vids_d['vid_id']] = vid
+
+  stage(ydl_espn_group_spider(d['data_source']))
+  if 'alt_data_source' in d:
+    stage(ydl_espn_archive_spider(d['alt_data_source']))
+
+
+  for vid_id, vid in staged_list.items():
+    udl_alg.download_video(vid['url'], vid['filename'], vid['path'])
+    smart_downloader.append_vid('espn', vid_id, vid['filename'])
+
 
 
 '''

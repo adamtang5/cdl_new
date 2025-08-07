@@ -194,7 +194,13 @@ def ydl_get_dict_espn(vid_id):
       }
 
       for vid_format in video['formats']:
-        if (vid_format['ext'] == 'mp4') and (vid_format['format_id'] in espn_format_ids):
+        if vid_format['aspect_ratio'] is not None and \
+          isinstance(vid_format['aspect_ratio'], float) and \
+          1.7 < vid_format['aspect_ratio'] < 1.8 and \
+          300 < vid_format['height'] < 400 and \
+          'acodec' in vid_format and \
+          vid_format['acodec'] != 'none':
+
           vid_d['formats'].append(vid_format)
 
       # print(vid_d)

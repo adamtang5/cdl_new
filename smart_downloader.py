@@ -41,25 +41,22 @@ exclude_etcg_titles = ["Office Hours Tech Question and Answers"]
 
 # Check to see if vid_id already exists in cache json
 def in_cache(platform, vid_id):
-  file = open(local_env.sdl_cache_path + platform + file_suffix, 'r')
-  dict = json.loads(file.read())
-  file.close()
-
-  return vid_id in dict['vid_ids']
+  with open(local_env.sdl_cache_path + platform + file_suffix, 'r') as file:
+    dict = json.loads(file.read())
+    return vid_id in dict['vid_ids']
 
 # print(in_cache('espn', '22020137'))
 
-def append_vid(platform, vid_id):
-  file = open(local_env.sdl_cache_path + platform + file_suffix, 'r')
-  dict = json.loads(file.read())
-  file.close()
+def append_vid(platform, vid_id, title):
+  dict = {}
+  with open(local_env.sdl_cache_path + platform + file_suffix, 'r') as file:
+    dict = json.loads(file.read())
 
-  dict['vid_ids'].append(vid_id)
-  file = open(local_env.sdl_cache_path + platform + file_suffix, 'w')
-  file.write(json.dumps(dict))
-  file.close()
+  dict['vid_ids'][vid_id] = title
 
-# append_vid('espn', '20865107')
+  with open(local_env.sdl_cache_path + platform + file_suffix, 'w') as file:
+    file.write(json.dumps(dict))
+
 
 def fix_cache(platform):
   file = open(local_env.sdl_cache_path + platform + file_suffix, 'r')
