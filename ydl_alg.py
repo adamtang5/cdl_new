@@ -169,7 +169,7 @@ def ydl_download_playlist(
 
       print("URL: " + request_url)
       udl_alg.download_video(request_url, vid_name, d['destination_path'])
-      smart_downloader.append_vid('youtube', vids_d['vid_id'])
+      smart_downloader.append_vid('youtube', vids_d['vid_id'], vid_name)
 
 
 def uploads_tab_to_items_dict(uploads_url):
@@ -731,7 +731,8 @@ def ydl_download_espn_group(group_name):
 
   for vid_id, vid in staged_list.items():
     udl_alg.download_video(vid['url'], vid['filename'], vid['path'])
-    smart_downloader.append_vid('espn', vid_id, vid['filename'])
+    if os.stat(vid['path'] + filename_tools.shrink_whitespace(vid['filename'] + '.mp4')).st_size >= 2000:
+      smart_downloader.append_vid('espn', vid_id, vid['filename'])
 
 
 
