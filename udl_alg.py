@@ -29,34 +29,19 @@ def download_video(url, name, path, ext=".mp4"):
 
   # For Windows OS
   if os.name == 'nt':
-    if url.endswith('.m3u8'):
-      if os.path.isfile(full_filename):
-        if os.stat(full_filename).st_size >= 2000:
-          pass
-        else:
-          subprocess.run(
-            ['ffmpeg', '-i', url, '-c', 'copy', full_filename],
-            shell=True
-          )
+    if os.path.isfile(full_filename):
+      if os.stat(full_filename).st_size >= 2000:
+        pass
       else:
         subprocess.run(
           ['ffmpeg', '-i', url, '-c', 'copy', full_filename],
-          shell=True
+          shell=False
         )
-
     else:
-      ps_url = "'" + filename_tools.prep_ps_url(url) + "'"
-      print(ps_url)
-      ps_filename = "'" + filename_tools.prep_ps_filename(full_filename) + "'"
-
-      if os.path.isfile(full_filename):
-        if os.stat(full_filename).st_size >= 2000:
-          pass
-        else:
-          win_cmd(ps_url, ps_filename)
-
-      else:
-        win_cmd(ps_url, ps_filename)
+      subprocess.run(
+        ['ffmpeg', '-i', url, '-c', 'copy', full_filename],
+        shell=False
+      )
 
   # For Linux OS
   elif os.name == 'posix':
