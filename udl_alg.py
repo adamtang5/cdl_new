@@ -10,6 +10,7 @@ import os
 import filename_tools
 import subprocess
 import urllib.request
+import requests
 
 
 def win_cmd(source, target):
@@ -58,6 +59,7 @@ def download_video(url, name, path, ext=".mp4"):
       subprocess.run("wget -O {} {}".format(sh_filename, sh_url), shell=True)
 
 
+# download_video('https://cdn.wlcdn88.com:777/20220417/DIrLoFrm/index.m3u8', 'Moglie E Marito', 'D:\Temp')
 # print("'" + filename_tools.prep_ps_url(url) + "'")
 # print("'" + full_filename + "'")
 # subprocess.run("powershell Invoke-WebRequest {} -OutFile {}".format("'" + filename_tools.prep_ps_url(url) + "'", "'" + full_filename + "'"), shell=True)
@@ -65,6 +67,9 @@ def download_video(url, name, path, ext=".mp4"):
 def podcast_downloader(url, full_path):
   sh_url = "'" + url + "'"
   sh_fullpath = '"' + full_path + '"'
+  headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  }
 
 
   if os.path.isfile(full_path):
@@ -73,7 +78,8 @@ def podcast_downloader(url, full_path):
     else:
       # For Windows OS
       if os.name == 'nt':
-        urllib.request.urlretrieve(url, full_path)
+        # urllib.request.urlretrieve(url, full_path)
+        download_with_requests(url, full_path)
 
       # For Linux
       elif os.name == 'posix':
@@ -81,7 +87,8 @@ def podcast_downloader(url, full_path):
   else:
     # For Windows OS
     if os.name == 'nt':
-      urllib.request.urlretrieve(url, full_path)
+      # urllib.request.urlretrieve(url, full_path)
+      download_with_requests(url, full_path)
 
     # For Linux
     elif os.name == 'posix':
@@ -90,3 +97,15 @@ def podcast_downloader(url, full_path):
   if os.stat(full_path).st_size < 2000:
     podcast_downloader(url, full_path)
 
+
+def download_with_requests(url, full_path):
+  headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  }
+
+  response = requests.get(url, headers=headers, stream=True)
+  response.raise_for_status()
+
+  with open(full_path, 'wb') as f:
+    for chunk in response.iter_content(chunk_size=8192):
+      f.write(chunk)

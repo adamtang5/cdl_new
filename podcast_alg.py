@@ -84,7 +84,7 @@ def espn_podcenter_downloader(pod_name, since_date):
         urls.append({'url': dl_url, 'filename': filename})
 
   for l in urls:
-    print("Downloading:", l['filename'])
+    print(f"Downloading: {l['filename']} from {l['url']}")
 
     udl_alg.podcast_downloader(l['url'], path + l['filename'])
 
@@ -268,7 +268,7 @@ def sn_downloader(pod_name, since_date):
 
   source_code = requests.get(xml_url)
   plain_text = source_code.text
-  #print(plain_text)
+  # print(plain_text)
 
   warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
   whole_soup = BeautifulSoup(plain_text, 'lxml')
@@ -276,7 +276,9 @@ def sn_downloader(pod_name, since_date):
   for item in whole_soup.find_all("item"):
     dl_url = item.find("enclosure").get("url")
     #print(dl_url)
-    filename = re.split('\/',dl_url)[-1].split('_')[-1]
+    episode = item.find("podcast:episode").text
+    # filename = re.split('\/',dl_url)[-1].split('_')[-1]
+    filename = f"sn{episode}.mp3"
     #print(filename)
     pod_date = item.find("pubdate").string[:16]
     pod_datetime = datetime.datetime.strptime(pod_date, '%a, %d %b %Y')
