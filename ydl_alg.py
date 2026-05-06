@@ -18,6 +18,7 @@ import datetime_tools
 import re
 import json
 import local_env
+import yt_dlp
 import os
 import m3u8_To_MP4
 from pathlib import Path
@@ -58,6 +59,7 @@ def playlist_to_contents_dict(playlist_url, count=80):
 
 def vid_to_contents_dict(vid_url):
   playlist_whole_soup = BeautifulSoup(requests.get(vid_url).text, "html.parser")
+  # print(playlist_whole_soup)
 
   soup_scripts = playlist_whole_soup.find_all("script")
   # print(soup_scripts)
@@ -171,6 +173,48 @@ def ydl_download_playlist(
       udl_alg.download_video(request_url, vid_name, d['destination_path'])
       smart_downloader.append_vid('youtube', vids_d['vid_id'], vid_name)
 
+
+def gemini_download_playlist(
+  playlist_name: str,
+  since_date: str
+) -> None:
+  """
+  Downloads videos from a playlist:
+  - newer than since_date
+  - not already in cache file
+  """
+
+  d = vchannel_data_api.lookup_by_source(playlist_name)
+  print(d)
+
+  # 1. Define yt-dlp options
+  ydl_opts = {
+    # Format: best format for phone screen
+    'format': 'bestvideo[height<=480]+bestaudio/best[height<=480]',
+    'merge_output_format': 'mp4',
+
+    # Filtering: Only download videos uploaded AFTER this date
+    'dateafter': since_date,
+
+    # History: Skips any video ID found in this json file
+    # 'download_cache': cache_file,
+
+    # Output template: saves into a folder named after the playlist
+    'outtmpl': f'{d["destination_path"]}{d["destination_prefix"]}%(title)s.%(ext)s',
+
+    'quiet': False,
+    'no_warnings': False,
+  }
+
+  try:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+      print(f"--- Starting Download for playlist: {playlist_name} ---")
+      print(f"--- Filtering for videos newer than: {since_date} ---")
+      ydl.download([d['data_source']])
+  except Exception as e:
+    print(f"An error occured: {e}")
+
+# gemini_download_playlist('china-uncensored', '20260428')
 
 def uploads_tab_to_items_dict(uploads_url):
   uploads_whole_soup = BeautifulSoup(requests.get(uploads_url).text, "html.parser")
@@ -725,8 +769,8 @@ def ydl_download_espn_group(group_name):
           staged_list[vids_d['vid_id']] = vid
 
   stage(ydl_espn_group_spider(d['data_source']))
-  if 'alt_data_source' in d:
-    stage(ydl_espn_archive_spider(d['alt_data_source']))
+  # if 'alt_data_source' in d:
+  #   stage(ydl_espn_archive_spider(d['alt_data_source']))
 
 
   for vid_id, vid in staged_list.items():
