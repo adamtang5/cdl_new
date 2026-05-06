@@ -21,7 +21,7 @@ def make_valid(s):
 #print(make_valid(" Windhorst: The Warriors had a 'glorious' summer"))
 
 def prep_ps_url(url):
-  return re.sub('&', '\"&\"', url)
+  return re.sub(r'&', r'\"&\"', url)
 
 # print(prep_ps_url("https://www.saveoffline.com/get/?i=fFRBZINc8Zku3I9fcfTQxbKr1zOCuDXN&u=lYuat1KxAqLXe6fjAVjiK3jkuuN7uoRB"))
 
