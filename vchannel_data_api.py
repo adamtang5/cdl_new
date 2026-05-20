@@ -36,12 +36,14 @@ VCHANNELS = {
     'list_id': 'UU_7vFlErTHxVD-IFNB-BFCg',
     'upload_url': 'https://www.youtube.com/c/AmericaUncovered/videos',
     'path': local_env.rolling_video_path,
+    'destination_prefix': 'AU ',
   },
   'china-uncensored': {
     'platform': 'youtube',
     'list_id': 'UUgFP46yVT-GG4o1TgXn-04Q',
     'upload_url': 'https://www.youtube.com/c/ChinaUncensored/videos',
     'path': local_env.rolling_video_path,
+    'destination_prefix': 'CU ',
   },
   'computerphile': {
     'platform': 'youtube',
@@ -96,6 +98,18 @@ VCHANNELS = {
     'list_id': 'UUBJycsmduvYEL83R_U4JriQ',
     'upload_url': 'https://www.youtube.com/c/mkbhd/videos',
     'path': local_env.rolling_video_path,
+  },
+  'corki': {
+    'platform': 'youtube',
+    'list_id': 'UUXwwEXv-QQZMRMDdeXzllJg',
+    'upload_url': 'https://www.youtube.com/@CORKI777/videos',
+    'path': local_env.espn_video_path,
+  },
+  'stjp': {
+    'platform': 'youtube',
+    'list_id': 'PLHeL6O-A-ASmHhPgjfoFmqQz81xiYNoPS',
+    'upload_url': 'https://www.youtube.com/@ESPNMLB/videos',
+    'path': local_env.espn_video_path,
   },
   'bible-project': {
     'platform': 'youtube',
@@ -488,6 +502,7 @@ def lookup_by_source(source: str) -> dict[str, str]:
       VPLATFORMS[VCHANNELS[source]['platform']]['url_suffix'],
     'alt_data_source': VCHANNELS[source]['archive_url'] if 'archive_url' in VCHANNELS[source] else '',
     'destination_path': local_env.video_root + VCHANNELS[source]['path'],
+    'destination_prefix': VCHANNELS[source]['destination_prefix'] if 'destination_prefix ' in VCHANNELS[source] else '',
     'low_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['low_res_label'],
     'high_res_label': VPLATFORMS[VCHANNELS[source]['platform']]['high_res_label'],
     'long_form': VPLATFORMS[VCHANNELS[source]['platform']]['long_form'],
