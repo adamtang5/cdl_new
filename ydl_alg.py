@@ -174,9 +174,37 @@ def ydl_download_playlist(
       smart_downloader.append_vid('youtube', vids_d['vid_id'], vid_name)
 
 
+def make_date_filter(since_date):
+  """
+  Creates a match_filter function that blocks videos older than since_date
+  """
+
+  def date_filter(info_d):
+    # YouTube returns 'upload_date' as a string: 'YYYYMMDD'
+    upload_date_str = info_d.get('upload_date')
+
+    if not upload_date_str:
+      return None   # If there's no upload date, let it pass or skip as you prefer
+
+    try:
+      video_date = datetime.datetime.strptime(upload_date_str, '%Y%m%d').date()
+
+      # If the video is older than our target date, skip it!
+      if video_date < since_date:
+        return f"[download] Reached an old video ({upload_date_str}). Stopping playlist scan."
+
+    except ValueError:
+      # Handle edge cases where the date string format is unexpected
+      return "Skipping: Could not parse upload date format"
+
+    return None   # Return None to allow the download
+
+  return date_filter
+
+
 def gemini_download_playlist(
   playlist_name: str,
-  since_date: str
+  since_date: datetime.date
 ) -> None:
   """
   Downloads videos from a playlist:
@@ -194,7 +222,11 @@ def gemini_download_playlist(
     'merge_output_format': 'mp4',
 
     # Filtering: Only download videos uploaded AFTER this date
-    'dateafter': since_date,
+    # 'dateafter': since_date,
+    'match_filter': make_date_filter(since_date),
+
+    # CRITICAL: Tell yt-dlp to stop scanning the playlist as soon as a video is rejected
+    'break_on_reject': True,
 
     # History: Skips any video ID found in this json file
     # 'download_cache': cache_file,
